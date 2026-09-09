@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Wayside — V0.1 Prototype</title>
+<style>
+:root{
+  --bg:#171717;--panel:#222;--panel2:#2b2b2b;--text:#ececec;--muted:#aaa;--line:#3a3a3a;--accent:#d6b36a;
+  --danger:#b85b5b;--ok:#7fa67a;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;touch-action:manipulation}
+button,input,select{-webkit-appearance:none;appearance:none}
+button{-webkit-tap-highlight-color:rgba(214,179,106,.18);touch-action:manipulation}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit} button{cursor:pointer}
+.wrap{max-width:1100px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left))}
+.topbar{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+.card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.stat{padding:12px}.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.value{font-weight:700;font-size:20px;margin-top:3px}
+.panel{padding:18px;margin-bottom:14px}.grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+h1,h2,h3{margin:0 0 8px}.muted{color:var(--muted)} .small{font-size:13px}.hidden{display:none!important}
+.btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:11px 13px;border-radius:10px;text-align:left}
+.btn:hover{border-color:#626262}.btn.primary{background:#3a3120;border-color:#6f5c34}.btn.danger{border-color:#704141}.btn:disabled{opacity:.4;cursor:not-allowed}
+.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:14px}
+.choice{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.choice .btn{text-align:center}
+.row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #303030}.row:last-child{border-bottom:0}
+.bar{height:9px;background:#111;border-radius:99px;overflow:hidden;border:1px solid #333;margin-top:5px}.fill{height:100%;background:var(--accent);width:50%}.hpfill{background:#9c5656}
+.log{max-height:220px;overflow:auto;padding-right:4px}.log p{margin:0 0 8px;color:#c7c7c7}
+.classgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.classpick{padding:16px}.classpick.selected{outline:2px solid var(--accent)}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 8px;font-size:12px;color:#ccc;margin:2px 3px 2px 0}
+.item{padding:10px;border:1px solid var(--line);border-radius:10px;background:#1b1b1b;margin-bottom:8px}.item strong{display:block}
+.intent{padding:10px;border-radius:10px;background:#1b1b1b;border:1px solid #554444;margin:10px 0}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+@media(max-width:760px){.topbar{grid-template-columns:repeat(2,1fr)}.grid2,.grid3,.classgrid{grid-template-columns:1fr}.actions{grid-template-columns:1fr}.wrap{padding:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="creator" class="panel">
+    <div class="label">New Game</div>
+    <h1>Wayside</h1>
+    <p class="muted">A compact single-player RPG prototype. Hidden systems, encounter logic, loot chances, and consequences are intentionally not exposed.</p>
+    <div style="margin:14px 0">
+      <label class="label" for="name">Name</label>
+      <input id="name" value="Edric" maxlength="24" style="width:100%;margin-top:6px;padding:10px;border-radius:9px;border:1px solid var(--line);background:#111;color:var(--text)">
+    </div>
+    <div class="label" style="margin-bottom:7px">Class</div>
+    <div class="classgrid">
+      <button class="btn classpick selected" data-class="vanguard"><strong>Vanguard</strong><div class="small muted">Armored melee combatant built around defense, pressure, and counters.</div></button>
+      <button class="btn classpick" data-class="ranger"><strong>Ranger</strong><div class="small muted">Mobile fighter using precision, tempo, and opportunistic attacks.</div></button>
+      <button class="btn classpick" data-class="arcanist"><strong>Arcanist</strong><div class="small muted">Flexible caster using Focus for burst, control, and wards.</div></button>
+    </div>
+    <div style="margin-top:14px">
+      <label class="label" for="background">Background</label>
+      <select id="background" style="width:100%;margin-top:6px;padding:10px;border-radius:9px;border:1px solid var(--line);background:#111;color:var(--text)">
+        <option value="wayfarer">Wayfarer</option>
+        <option value="militia">Militia Veteran</option>
+        <option value="tradesman">Tradesman's Apprentice</option>
+      </select>
+    </div>
+    <button id="start" class="btn primary" type="button" style="width:100%;margin-top:16px;text-align:center"><strong>Begin Journey</strong></button>
+
+    <button id="titleLoadGame" class="btn" type="button" style="width:100%;margin-top:10px;text-align:center"><strong>Load Saved Game</strong></button>
+  </section>
+
+  <main id="game" class="hidden">
+    <section class="panel" style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+      <div>
+        <div class="label">Save</div>
+        <div id="saveStatus" class="small muted">Checking Safari storage…</div>
+        <div id="storageMode" class="small muted"></div>
+      </div>
+      <div class="choice" style="margin-top:0">
+        <button id="saveGame" class="btn" type="button">Save Game</button>
+        <button id="loadGame" class="btn" type="button">Load Game</button>
+        <button id="newGameReset" class="btn danger" type="button">New Game</button>
+      </div>
+    </section>
+    <div class="topbar">
+      <div class="card stat"><div class="label">Character</div><div class="value" id="hudName">—</div><div class="small muted" id="hudClass">—</div></div>
+      <div class="card stat"><div class="label">Level</div><div class="value" id="hudLevel">1</div><div class="small muted" id="hudXp">0 / 10 XP</div></div>
+      <div class="card stat"><div class="label">Health</div><div class="value" id="hudHp">—</div><div class="bar"><div id="hpbar" class="fill hpfill"></div></div></div>
+      <div class="card stat"><div class="label" id="resourceLabel">Resource</div><div class="value" id="hudRes">—</div><div class="bar"><div id="resbar" class="fill"></div></div></div>
+      <div class="card stat"><div class="label">Silver</div><div class="value" id="hudSilver">18</div><div class="small muted" id="hudRep">Rep 0</div></div>
+    </div>
+
+    <div class="grid2">
+      <section class="panel">
+        <div class="label" id="timeLabel">Late afternoon</div>
+        <h2 id="locationName">Wayside</h2>
+        <p id="locationDesc" class="muted"></p>
+        <div id="sceneText"></div>
+        <div id="worldActions" class="actions"></div>
+      </section>
+
+      <section class="panel">
+        <div class="tabs">
+          <button class="btn" data-tab="character">Character</button>
+          <button class="btn" data-tab="inventory">Inventory</button>
+          <button class="btn" data-tab="journal">Journal</button>
+        </div>
+        <div id="tab-character"></div>
+        <div id="tab-inventory" class="hidden"></div>
+        <div id="tab-journal" class="hidden log"></div>
+      </section>
+    </div>
+
+    <section id="combatPanel" class="panel hidden">
+      <div class="label">Combat</div>
+      <h2 id="enemyName">Enemy</h2>
+      <div class="row"><span>Enemy HP</span><strong id="enemyHp"></strong></div>
+      <div id="enemyIntent" class="intent"></div>
+      <div id="combatActions" class="grid3"></div>
+      <p id="combatLog" class="muted" style="margin-top:12px"></p>
+    </section>
+
+    <section id="levelPanel" class="panel hidden">
+      <div class="label">Level Up</div>
+      <h2>Choose your development</h2>
+      <p class="muted">Your class is changing. Pick one improvement.</p>
+      <div id="levelChoices" class="grid3"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+window.addEventListener("error",function(e){
+  var box=document.getElementById("startupErrorGlobal");
+  if(!box){
+    box=document.createElement("div");
+    box.id="startupErrorGlobal";
+    box.style.cssText="position:fixed;left:10px;right:10px;bottom:10px;z-index:9999;background:#4b2020;color:#fff;padding:10px;border-radius:10px;font:13px system-ui";
+    document.body.appendChild(box);
+  }
+  box.textContent="Wayside error: "+(e.message||"Unknown JavaScript error");
+});
+
+(() => {
+const CLASSES = {
+  vanguard:{name:"Vanguard",hp:34,res:"Resolve",maxRes:4,weapon:"Arming Sword",armor:"Padded Coat",desc:"Hold pressure, create openings, retaliate.",
+    skills:[
+      {id:"strike",name:"Measured Strike",txt:"Reliable damage. Gain 1 Resolve."},
+      {id:"brace",name:"Brace",txt:"Reduce the next hit. Gain 2 Resolve."},
+      {id:"riposte",name:"Riposte",txt:"Spend 2 Resolve for a hard counterattack."}
+    ]},
+  ranger:{name:"Ranger",hp:26,res:"Momentum",maxRes:5,weapon:"Hunting Bow",armor:"Leather Jack",desc:"Build tempo and punish exposed enemies.",
+    skills:[
+      {id:"shot",name:"Quick Shot",txt:"Reliable damage. Gain 1 Momentum."},
+      {id:"evade",name:"Evade",txt:"Reduce the next hit. Gain 1 Momentum."},
+      {id:"pierce",name:"Piercing Shot",txt:"Spend 2 Momentum. Strong against guarded enemies."}
+    ]},
+  arcanist:{name:"Arcanist",hp:22,res:"Focus",maxRes:6,weapon:"Ashwood Focus",armor:"Traveling Robes",desc:"Generate Focus and spend it on magic and control.",
+    skills:[
+      {id:"bolt",name:"Arc Bolt",txt:"Magic damage. Gain 2 Focus."},
+      {id:"ward",name:"Ward",txt:"Reduce the next hit. Gain 1 Focus."},
+      {id:"flare",name:"Flare",txt:"Spend 3 Focus for heavy spell damage."}
+    ]}
+};
+
+const LOCS = {
+  wayside:{name:"Wayside",desc:"A weathered frontier settlement behind an old timber palisade. The inn, smithy, and market sit close to the north gate."},
+  road:{name:"Old North Road",desc:"A rutted road running between low hills. Traffic is sparse, and the country grows quieter north of Wayside."},
+  camp:{name:"Abandoned Camp",desc:"A cold firepit, a torn canvas shelter, and belongings left too quickly."},
+  hollow:{name:"Hollow Track",desc:"A narrow deer path descends into alder and stone, away from the main road."},
+  cellar:{name:"Collapsed Toll Cellar",desc:"A buried stone chamber beneath the remnants of an old roadside tollhouse."}
+};
+
+const S={
+  name:"",cls:null,bg:null,lvl:1,xp:0,nextXp:10,hp:0,maxHp:0,res:0,maxRes:0,silver:18,rep:0,
+  loc:"wayside",quest:"none",stage:0,flags:{
+    heardGate:false,metMara:false,roadUnlocked:false,raiderGone:false,campSeen:false,campLooted:false,
+    tracksRead:false,helpedDriver:false,intimidatedRaider:false,sparedRaider:false,raiderInfo:false,
+    foundCharm:false,charmExamined:false,foundCellar:false,rescuedIlya:false,ilyaAlive:true,
+    tookLedger:false,burnedLedger:false,gaveLedgerMara:false,gaveLedgerGuard:false,keptLedger:false,
+    cellarCleared:false,bossDefeated:false,returned:false,ending:null,marketRumor:false,smithClue:false,
+    tonicGift:false,finalChoiceMade:false,sideCache:false
+  },
+  inv:[{id:"tonic",name:"Minor Tonic",type:"consumable",qty:2,desc:"Restores 8 HP."}],
+  equip:{weapon:null,armor:null,accessory:null},journal:[],combat:null,levelChoice:false,tab:"character",
+  pendingScene:null
+};
+
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const roll=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function log(t){S.journal.unshift(t);S.journal=S.journal.slice(0,60)}
+function addItem(item){
+  const e=S.inv.find(x=>x.id===item.id);
+  if(e && item.qty){e.qty+=item.qty}else if(!e) S.inv.push({...item});
+}
+function removeItem(id,qty=1){
+  const e=S.inv.find(x=>x.id===id); if(!e)return false;
+  if(e.qty){ if(e.qty<qty)return false; e.qty-=qty; if(e.qty<=0)S.inv=S.inv.filter(x=>x!==e); return true;}
+  S.inv=S.inv.filter(x=>x!==e); return true;
+}
+function hasItem(id){return !!S.inv.find(x=>x.id===id)}
+
+const SAVE_KEY="wayside_v01_save";
+const IDB_DB="wayside_v01_db";
+const IDB_STORE="saves";
+let storageBackend="unknown";
+let autosaveTimer=null;
+
+function serializableState(){
+  const clean=JSON.parse(JSON.stringify(S));
+  clean.pendingScene=null;
+  return clean;
+}
+function setSaveStatus(text){
+  const el=$("#saveStatus"); if(el) el.textContent=text;
+}
+function setStorageMode(text){
+  const el=$("#storageMode"); if(el) el.textContent=text;
+}
+function testLocalStorage(){
+  try{
+    if(!window.localStorage) return false;
+    const k="__wayside_storage_test__";
+    window.localStorage.setItem(k,"ok");
+    const ok=window.localStorage.getItem(k)==="ok";
+    window.localStorage.removeItem(k);
+    return ok;
+  }catch(e){return false}
+}
+function openSaveDB(){
+  return new Promise((resolve,reject)=>{
+    try{
+      if(!window.indexedDB){reject(new Error("IndexedDB unavailable"));return;}
+      const req=window.indexedDB.open(IDB_DB,1);
+      req.onupgradeneeded=()=>{
+        const db=req.result;
+        if(!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+      };
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error||new Error("IndexedDB open failed"));
+      req.onblocked=()=>reject(new Error("IndexedDB blocked"));
+    }catch(e){reject(e)}
+  });
+}
+async function idbPut(value){
+  const db=await openSaveDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(IDB_STORE,"readwrite");
+    tx.objectStore(IDB_STORE).put(value,SAVE_KEY);
+    tx.oncomplete=()=>{db.close();resolve(true)};
+    tx.onerror=()=>{const e=tx.error;db.close();reject(e||new Error("IndexedDB write failed"))};
+    tx.onabort=()=>{const e=tx.error;db.close();reject(e||new Error("IndexedDB write aborted"))};
+  });
+}
+async function idbGet(){
+  const db=await openSaveDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(IDB_STORE,"readonly");
+    const req=tx.objectStore(IDB_STORE).get(SAVE_KEY);
+    req.onsuccess=()=>resolve(req.result||null);
+    req.onerror=()=>reject(req.error||new Error("IndexedDB read failed"));
+    tx.oncomplete=()=>db.close();
+  });
+}
+async function chooseStorageBackend(){
+  if(testLocalStorage()){
+    storageBackend="localStorage";
+    setStorageMode("Storage: Safari localStorage");
+    return storageBackend;
+  }
+  try{
+    await idbPut({__probe:true,t:Date.now()});
+    const probe=await idbGet();
+    if(probe && probe.__probe){
+      storageBackend="indexedDB";
+      setStorageMode("Storage: Safari IndexedDB fallback");
+      return storageBackend;
+    }
+  }catch(e){}
+  storageBackend="none";
+  setStorageMode("Storage unavailable in this Safari context");
+  return storageBackend;
+}
+async function saveGame(manual=false){
+  if(!S.cls) return;
+  try{
+    if(storageBackend==="unknown") await chooseStorageBackend();
+    const payload=serializableState();
+    if(storageBackend==="localStorage"){
+      window.localStorage.setItem(SAVE_KEY,JSON.stringify(payload));
+    }else if(storageBackend==="indexedDB"){
+      await idbPut(payload);
+    }else{
+      setSaveStatus("Persistent save unavailable. Try opening the file directly in Safari rather than Files preview.");
+      return;
+    }
+    const now=new Date();
+    setSaveStatus(`${manual?"Saved":"Autosaved"} · ${now.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`);
+  }catch(err){
+    // If localStorage unexpectedly fails, immediately retry via IndexedDB.
+    if(storageBackend==="localStorage"){
+      try{
+        storageBackend="indexedDB";
+        await idbPut(serializableState());
+        setStorageMode("Storage: Safari IndexedDB fallback");
+        setSaveStatus(manual?"Saved":"Autosaved");
+        return;
+      }catch(e){}
+    }
+    setSaveStatus("Save failed in this Safari context.");
+  }
+}
+function hydrateState(saved){
+  if(!saved || typeof saved!=="object") throw new Error("Invalid save");
+  for(const k of Object.keys(S)) delete S[k];
+  Object.assign(S,saved);
+  S.pendingScene=null;
+  if(!S.flags)S.flags={};
+  if(!Array.isArray(S.inv))S.inv=[];
+  if(!Array.isArray(S.journal))S.journal=[];
+  if(!S.equip)S.equip={weapon:null,armor:null,accessory:null};
+  if(!S.tab)S.tab="character";
+}
+async function loadGame(){
+  try{
+    if(storageBackend==="unknown") await chooseStorageBackend();
+    let saved=null;
+    if(storageBackend==="localStorage"){
+      const raw=window.localStorage.getItem(SAVE_KEY);
+      saved=raw?JSON.parse(raw):null;
+    }else if(storageBackend==="indexedDB"){
+      saved=await idbGet();
+      if(saved && saved.__probe) saved=null;
+    }
+    if(!saved){setSaveStatus("No saved game found.");return;}
+    hydrateState(saved);
+    $("#creator").classList.add("hidden");
+    $("#game").classList.remove("hidden");
+    setSaveStatus("Save loaded.");
+    render();
+  }catch(err){
+    console.error("Wayside load error",err);
+    setSaveStatus("Could not load this save.");
+  }
+}
+function resetGame(){
+  if(!window.confirm("Start a new game? Your existing save will remain until you save over it."))return;
+  window.location.reload();
+}
+function autosave(){
+  if(!S.cls)return;
+  clearTimeout(autosaveTimer);
+  autosaveTimer=setTimeout(()=>saveGame(false),250);
+}
+function gainXp(n){
+  S.xp+=n;
+  if(S.xp>=S.nextXp && !S.levelChoice){S.xp-=S.nextXp;S.levelChoice=true}
+}
+function setScene(html){$("#sceneText").innerHTML=html}
+function btn(text,fn,sub=""){
+  const b=document.createElement("button");b.className="btn";b.innerHTML=`<strong>${text}</strong>${sub?`<div class="small muted">${sub}</div>`:""}`;b.addEventListener("click",fn);return b;
+}
+function clearActions(){const a=$("#worldActions");a.innerHTML="";return a}
+let selectedClass="vanguard";
+function chooseClass(cls){
+  if(!CLASSES[cls]) return;
+  selectedClass=cls;
+  $$(".classpick").forEach(x=>x.classList.toggle("selected",x.dataset.class===cls));
+}
+$("#creator").addEventListener("click",(ev)=>{
+  const pick=ev.target.closest("[data-class]");
+  if(pick){ev.preventDefault();chooseClass(pick.dataset.class);}
+});
+function beginJourney(){
+  try{
+    const cls=selectedClass && CLASSES[selectedClass] ? selectedClass : "vanguard";
+    const c=CLASSES[cls];
+    const nameEl=$("#name"), bgEl=$("#background");
+    const name=(nameEl && nameEl.value.trim()) || "Traveler";
+    S.name=name;
+    S.cls=cls;
+    S.bg=(bgEl && bgEl.value) || "wayfarer";
+    S.hp=S.maxHp=c.hp;
+    S.maxRes=c.maxRes;
+    S.res=cls==="vanguard"?1:0;
+    S.equip.weapon={name:c.weapon,power:1,desc:"Reliable starting weapon."};
+    S.equip.armor={name:c.armor,armor:1,desc:"Practical road gear."};
+    log(`${name} arrived in Wayside.`);
+    const creator=$("#creator"), game=$("#game");
+    if(creator) creator.classList.add("hidden");
+    if(game) game.classList.remove("hidden");
+    render();
+  }catch(err){
+    console.error("Wayside startup failed:",err);
+    const creator=$("#creator");
+    if(creator){
+      let msg=document.getElementById("startupError");
+      if(!msg){
+        msg=document.createElement("p");
+        msg.id="startupError";
+        msg.style.cssText="margin-top:12px;color:#e2a0a0;font-size:13px";
+        creator.appendChild(msg);
+      }
+      msg.textContent="Startup error: "+(err && err.message ? err.message : String(err));
+    }
+  }
+}
+$("#start").addEventListener("click",beginJourney);
+$$("[data-tab]").forEach(b=>b.addEventListener("click",()=>{S.tab=b.dataset.tab;renderTabs()}));
+
+$("#saveGame").addEventListener("click",(e)=>{e.preventDefault();saveGame(true);});
+$("#titleLoadGame").addEventListener("click",(e)=>{e.preventDefault();loadGame();});
+$("#loadGame").addEventListener("click",(e)=>{e.preventDefault();loadGame();});
+$("#newGameReset").addEventListener("click",(e)=>{e.preventDefault();resetGame();});
+
+function render(){
+  if(!S.cls)return;
+  const c=CLASSES[S.cls],l=LOCS[S.loc];
+  $("#hudName").textContent=S.name;$("#hudClass").textContent=`${c.name} · ${backgroundName()}`;
+  $("#hudLevel").textContent=S.lvl;$("#hudXp").textContent=`${S.xp} / ${S.nextXp} XP`;
+  $("#hudHp").textContent=`${S.hp} / ${S.maxHp}`;$("#hpbar").style.width=`${Math.max(0,S.hp/S.maxHp*100)}%`;
+  $("#resourceLabel").textContent=c.res;$("#hudRes").textContent=`${S.res} / ${S.maxRes}`;$("#resbar").style.width=`${Math.max(0,S.res/S.maxRes*100)}%`;
+  $("#hudSilver").textContent=S.silver;$("#hudRep").textContent=`Rep ${S.rep}`;
+  $("#locationName").textContent=l.name;$("#locationDesc").textContent=l.desc;
+  renderWorld();renderTabs();renderCombat();renderLevel();
+  autosave();
+}
+function backgroundName(){return S.bg==="militia"?"Militia Veteran":S.bg==="tradesman"?"Tradesman's Apprentice":"Wayfarer"}
+
+function renderTabs(){
+  ["character","inventory","journal"].forEach(t=>$("#tab-"+t).classList.toggle("hidden",S.tab!==t));
+  const bgPerk=S.bg==="militia"?"Reads armed people and military habits more easily.":S.bg==="tradesman"?"Recognizes workmanship, tools, and improvised mechanisms.":"Reads roads, tracks, and travel behavior more easily.";
+  $("#tab-character").innerHTML=`
+    <div class="row"><span>Class</span><strong>${CLASSES[S.cls].name}</strong></div>
+    <div class="row"><span>Background</span><strong>${backgroundName()}</strong></div>
+    <div class="row"><span>Weapon</span><strong>${S.equip.weapon?.name||"—"}</strong></div>
+    <div class="row"><span>Armor</span><strong>${S.equip.armor?.name||"—"}</strong></div>
+    <div class="row"><span>Accessory</span><strong>${S.equip.accessory?.name||"—"}</strong></div>
+    <p class="small muted">${CLASSES[S.cls].desc}</p><p class="small muted">${bgPerk}</p>`;
+  $("#tab-inventory").innerHTML=S.inv.length?S.inv.map(i=>`<div class="item"><strong>${i.name}${i.qty?` ×${i.qty}`:""}</strong><span class="small muted">${i.desc||""}</span></div>`).join(""):"<p class='muted'>Your pack is empty.</p>";
+  $("#tab-journal").innerHTML=S.journal.map(x=>`<p>• ${x}</p>`).join("")||"<p class='muted'>Nothing recorded yet.</p>";
+}
+
+function renderWorld(){
+  const a=clearActions();
+  if(S.combat||S.levelChoice)return;
+  if(S.flags.ending){renderEnding();return;}
+  if(S.pendingScene){S.pendingScene();return;}
+  if(S.loc==="wayside")renderWayside(a);
+  else if(S.loc==="road")renderRoad(a);
+  else if(S.loc==="camp")renderCamp(a);
+  else if(S.loc==="hollow")renderHollow(a);
+  else if(S.loc==="cellar")renderCellar(a);
+}
+
+function renderWayside(a){
+  if(!S.flags.metMara){
+    setScene(`<p>Late afternoon settles over Wayside. A wagon driver near the gate is arguing with two guards. Across the square, an inn sign creaks in the wind.</p>`);
+    a.append(
+      btn("Enter the Bent Nail",innScene,"Food, lodging, and conversation."),
+      btn("Listen near the gate",gateScene,"The wagon driver sounds irritated."),
+      btn("Visit the smithy",smithScene,"Weapons, repairs, and practical gear."),
+      btn("Browse the market",marketScene,"Supplies before the stalls close.")
+    );
+    return;
+  }
+  if(S.flags.bossDefeated && !S.flags.returned){
+    setScene(`<p>The north gate comes into view again. Word has traveled ahead of you; Mara is already waiting near the Bent Nail.</p>`);
+    a.append(btn("Speak with Mara",returnToMara));
+    return;
+  }
+  setScene(`<p>Wayside feels smaller now that you know a few faces. The north gate stands open, and evening is drawing in.</p>`);
+  a.append(
+    btn("Bent Nail",innScene),
+    btn("Smithy",smithScene),
+    btn("Market",marketScene),
+    btn("North Gate",()=>{S.loc="road";log("Left Wayside by the north gate.");render()},"Take the Old North Road.")
+  );
+}
+
+function innScene(){
+  setScene(`<p>Warm air and woodsmoke roll out of the Bent Nail. Mara Venn sits where she can see the door.</p>`);
+  const a=clearActions();
+  if(!S.flags.metMara) a.append(btn("Speak to the caravan guard",maraScene));
+  else a.append(btn("Speak with Mara",maraFollowup));
+  a.append(
+    btn("Order a meal — 2 silver",()=>{if(S.silver>=2){S.silver-=2;S.hp=Math.min(S.maxHp,S.hp+5);log("Ate a hot meal at the Bent Nail.");render()}}, "Recover 5 HP."),
+    btn("Go back outside",render)
+  );
+}
+function maraScene(){
+  S.flags.metMara=true;S.quest="missing";S.stage=1;S.flags.roadUnlocked=true;
+  log("Mara Venn asked you to investigate disappearances on the north road.");
+  setScene(`<p>The guard introduces herself as <strong>Mara Venn</strong>. Three travelers have gone missing north of town. One wagon came back empty. Another never returned at all.</p><p>“I don't need heroics. I need to know what happened.”</p>`);
+  const a=clearActions();
+  a.append(
+    btn("Accept the job",()=>{log("Accepted Mara's investigation.");render()}),
+    btn("Ask about payment",()=>{setScene(`<p>“Twenty silver if you bring back something I can act on. More if you bring someone home alive.”</p>`);clearActions().append(btn("Accept",render));}),
+    btn("Ask who vanished",()=>{setScene(`<p>“Two traders, then a courier named Ilya. She knew the road. That's why I'm worried.”</p>`);clearActions().append(btn("Accept",render));})
+  );
+}
+function maraFollowup(){
+  let extra="";
+  if(S.flags.raiderInfo) extra="<p>When you mention the man on the road, Mara's expression tightens. “So someone else knows what's happening out there.”</p>";
+  else if(S.flags.campSeen) extra="<p>Mara listens while you describe the abandoned camp. “Keep going. Don't assume everyone who vanished is dead.”</p>";
+  else extra="<p>“Start with the abandoned wagon site. North road, a few miles out.”</p>";
+  setScene(extra);
+  clearActions().append(btn("Leave",render));
+}
+function gateScene(){
+  S.flags.heardGate=true;log("Overheard concern about a second disappearance on the north road.");
+  let t=`<p>“I'm not taking that road again tonight,” the driver says. One guard mutters something about a second disappearance this week.</p>`;
+  if(S.bg==="wayfarer")t+=`<p>You notice the wagon's left wheel is freshly scraped, as if it clipped stone while turning hard at speed.</p>`;
+  setScene(t);
+}
+function smithScene(){
+  setScene(`<p>The smithy is hot enough to sting your eyes. A broad-shouldered man looks over your gear without being asked.</p><p>“It'll do. For now.”</p>`);
+  const a=clearActions();
+  a.append(
+    btn("Ask about the north road",()=>{
+      S.flags.smithClue=true;log("The smith mentioned an old tollhouse north of town.");
+      let x=`<p>“There's an old tollhouse beyond the second bend. Roof went in years ago. Folks still use the cellar when weather turns.”</p>`;
+      if(S.bg==="tradesman")x+=`<p>He sketches the old latch arrangement with a piece of charcoal. You understand how the cellar entrance would have been hidden from casual view.</p>`;
+      setScene(x);clearActions().append(btn("Back",smithScene));
+    }),
+    btn("Repair and rest — 4 silver",()=>{if(S.silver>=4){S.silver-=4;S.hp=S.maxHp;log("Rested while the smith tended your equipment.");render()}}),
+    btn("Leave",render)
+  );
+}
+function marketScene(){
+  let x=`<p>A provisioner is packing away dried food, lamp oil, cord, and small medicines.</p>`;
+  if(!S.flags.marketRumor)x+=`<p>A peddler nearby tells anyone who will listen that he heard bells north of town two nights ago. Nobody seems impressed.</p>`;
+  setScene(x);
+  const a=clearActions();
+  a.append(
+    btn("Buy Minor Tonic — 6 silver",()=>{if(S.silver>=6){S.silver-=6;addItem({id:"tonic",name:"Minor Tonic",type:"consumable",qty:1,desc:"Restores 8 HP."});log("Bought a Minor Tonic.");render()}}),
+    btn("Ask about the bell rumor",()=>{S.flags.marketRumor=true;log("Heard a rumor about bells north of Wayside.");setScene(`<p>The peddler swears it came from below the road, not above it. He refuses to elaborate unless you buy something, then admits he ran before looking.</p>`);clearActions().append(btn("Leave",render));}),
+    btn("Leave",render)
+  );
+}
+
+function renderRoad(a){
+  setScene(`<p>The road bends between scrub-covered hills. Old wagon tracks overlap in the mud. A shallow ditch runs along the east side.</p>`);
+  a.append(
+    btn("Inspect the roadside",roadsideScene),
+    btn("Continue north",northRoadScene),
+    btn("Return to Wayside",()=>{S.loc="wayside";render()})
+  );
+  if(S.flags.campSeen)a.append(btn("Go to the abandoned camp",()=>{S.loc="camp";render()}));
+  if(S.flags.foundCellar)a.append(btn("Take the hidden track",()=>{S.loc="hollow";render()}));
+}
+
+function roadsideScene(){
+  if(!S.flags.raiderGone){
+    setScene(`<p>You kneel beside drag marks in the dirt. A boot scrapes stone behind you.</p><p>A lean man with a short blade watches from the ditch. “Road's closed.”</p>`);
+    const a=clearActions();
+    if(S.bg==="militia")a.append(btn("Call his bluff",()=>{
+      S.flags.intimidatedRaider=true;S.flags.raiderGone=true;S.flags.raiderInfo=true;S.silver+=2;gainXp(4);
+      log("Intimidated a roadside brigand into backing down.");
+      setScene(`<p>You point out three details in his stance that say he doesn't want a real fight. He swears under his breath, tosses two silver into the road, and backs away.</p><p>Before leaving, he warns you not to follow the tracks toward “the buried room.”</p>`);
+      clearActions().append(btn("Continue",render));
+    },"Your training gives you leverage."));
+    a.append(
+      btn("Fight",()=>startCombat("raider")),
+      btn("Ask what he wants",raiderTalk),
+      btn("Withdraw toward Wayside",()=>{S.loc="wayside";render()})
+    );
+  } else {
+    setScene(`<p>The roadside is quiet now. The drag marks continue into the scrub.</p>`);
+    clearActions().append(btn("Follow the marks",()=>{S.flags.foundCellar=true;S.loc="hollow";log("Followed drag marks away from the north road.");render()}),btn("Back",render));
+  }
+}
+function raiderTalk(){
+  setScene(`<p>“Nothing from you. Just turn around.” His eyes flick once toward the scrub, then back to you.</p>`);
+  const a=clearActions();
+  a.append(
+    btn("Offer 3 silver for information",()=>{
+      if(S.silver<3)return;
+      S.silver-=3;S.flags.raiderGone=true;S.flags.raiderInfo=true;S.flags.foundCellar=true;gainXp(3);
+      log("Paid a brigand for information about a hidden cellar.");
+      setScene(`<p>He takes the coin and points toward a low ridge. “Old cellar. People have been using it. Not all of them willingly.”</p><p>He leaves before you can ask more.</p>`);clearActions().append(btn("Continue",render));
+    }),
+    btn("Tell him to leave",()=>startCombat("raider")),
+    btn("Back away",()=>{S.loc="wayside";render()})
+  );
+}
+function northRoadScene(){
+  if(!S.flags.campSeen){S.flags.campSeen=true;S.loc="camp";log("Found an abandoned camp north of Wayside.");render();return}
+  setScene(`<p>You travel farther north. Nothing obvious lies ahead except empty road and a leaning milestone.</p>`);
+  const a=clearActions();
+  if(S.flags.smithClue||S.flags.marketRumor||S.flags.tracksRead)a.append(btn("Search off-road",()=>{S.flags.foundCellar=true;S.loc="hollow";log("Located a hidden track off the north road.");render()}));
+  a.append(btn("Return to the camp",()=>{S.loc="camp";render()}),btn("Back toward Wayside",()=>{S.loc="road";render()}));
+}
+
+function renderCamp(a){
+  setScene(`<p>The abandoned camp sits in a shallow hollow away from the road. Whoever left did so quickly.</p>`);
+  a.append(
+    btn("Search the camp",campSearch),
+    btn("Inspect the tracks",campTracks),
+    btn("Return to the road",()=>{S.loc="road";render()})
+  );
+}
+function campSearch(){
+  if(!S.flags.campLooted){
+    S.flags.campLooted=true;S.silver+=5;addItem({id:"old_charm",name:"Worn Brass Charm",type:"trinket",desc:"Warm to the touch despite the cold air."});S.flags.foundCharm=true;
+    log("Searched the abandoned camp and found a brass charm.");
+    setScene(`<p>Beneath a folded blanket you find five silver and a worn brass charm. The charm is oddly warm.</p>`);
+    const a=clearActions();
+    a.append(btn("Examine the charm",examineCharm),btn("Pocket it and move on",render));
+  }else setScene(`<p>You've already taken what looked useful.</p>`);
+}
+function examineCharm(){
+  S.flags.charmExamined=true;log("Examined the warm brass charm.");
+  let x=`<p>The charm bears a stamped image almost worn smooth. The metal is warmer along one edge.</p>`;
+  if(S.bg==="tradesman")x+=`<p>The wear pattern suggests it was repeatedly fitted into something rather than merely worn as jewelry.</p>`;
+  setScene(x);clearActions().append(btn("Continue",render));
+}
+function campTracks(){
+  S.flags.tracksRead=true;S.flags.foundCellar=true;gainXp(2);log("Read the tracks leading away from the abandoned camp.");
+  let x=`<p>The tracks are confused: several human prints, then something heavier. They continue north, but not along the road.</p>`;
+  if(S.bg==="wayfarer")x+=`<p>You can tell one person was being supported by another. A third kept circling back, probably watching their rear.</p>`;
+  setScene(x);clearActions().append(btn("Follow the tracks",()=>{S.loc="hollow";render()}),btn("Stay at the camp",render));
+}
+
+function renderHollow(a){
+  setScene(`<p>The hidden path winds through alder and broken stone. Ahead, part of an old structure has sunk into the hillside. A cracked timber door lies half-buried beneath ivy.</p>`);
+  a.append(
+    btn("Approach the buried entrance",cellarEntrance),
+    btn("Search the surrounding slope",searchSlope),
+    btn("Return to the road",()=>{S.loc="road";render()})
+  );
+}
+function searchSlope(){
+  if(S.flags.sideCache){setScene(`<p>You already searched the slope thoroughly.</p>`);return}
+  S.flags.sideCache=true;addItem({id:"bandage",name:"Field Dressing",type:"consumable",qty:1,desc:"Restores 5 HP outside combat."});S.silver+=3;gainXp(2);
+  log("Found a small hidden supply cache near the old tollhouse.");
+  setScene(`<p>Behind a loose stone you find a wrapped field dressing and three silver. Someone hid these recently.</p>`);
+}
+function cellarEntrance(){
+  let x=`<p>The old door is swollen in its frame. Fresh scratches show that it has been used recently.</p>`;
+  const a=clearActions();
+  if(S.flags.charmExamined && hasItem("old_charm")){
+    x+=`<p>A shallow brass recess sits beside the latch. The shape looks familiar.</p>`;
+    a.append(btn("Use the brass charm",()=>{
+      log("Used the brass charm to open the toll cellar quietly.");
+      S.loc="cellar";S.flags.foundCellar=true;S.flags.quietEntry=true;render();
+    }));
+  }
+  if(S.bg==="tradesman")a.append(btn("Work the old latch",()=>{
+    log("Opened the cellar using the old latch mechanism.");S.loc="cellar";S.flags.quietEntry=true;render();
+  },"You recognize how the mechanism was built."));
+  a.append(
+    btn("Force the door",()=>{S.loc="cellar";S.flags.loudEntry=true;log("Forced your way into the buried cellar.");render()}),
+    btn("Back away",render)
+  );
+  setScene(x);
+}
+
+function renderCellar(a){
+  if(!S.flags.cellarCleared){
+    setScene(`<p>Stale air, damp stone, and lamplight. Voices carry from deeper inside. Someone coughs, then goes quiet.</p>`);
+    a.append(
+      btn("Advance carefully",cellarAdvance),
+      btn("Call out",cellarCall),
+      btn("Leave",()=>{S.loc="hollow";render()})
+    );
+    return;
+  }
+  if(!S.flags.bossDefeated){
+    setScene(`<p>The chamber is quiet now. A reinforced inner door stands at the far end, marked by scratches and old wax seals.</p>`);
+    a.append(btn("Open the inner door",finalChamber),btn("Return outside",()=>{S.loc="hollow";render()}));
+    return;
+  }
+  setScene(`<p>The cellar is still. Whatever held this place together has ended.</p>`);
+  a.append(btn("Return to Wayside",()=>{S.loc="wayside";render()}));
+}
+
+function cellarCall(){
+  if(S.flags.loudEntry){
+    setScene(`<p>Something moves immediately in the chamber ahead. Your voice was enough.</p>`);
+    clearActions().append(btn("Ready yourself",()=>startCombat("cellar_guard")));
+  } else {
+    setScene(`<p>A strained voice answers: “Don't come closer.” Another voice whispers sharply for silence.</p>`);
+    clearActions().append(
+      btn("Say Mara sent you",()=>{S.flags.rescuedIlya=true;log("Made contact with Ilya inside the toll cellar.");setScene(`<p>After a long pause, a woman answers. “Then get me out before they come back.”</p>`);clearActions().append(btn("Move forward",cellarAdvance));}),
+      btn("Stay silent and advance",cellarAdvance)
+    );
+  }
+}
+function cellarAdvance(){
+  if(S.flags.quietEntry && !S.flags.rescuedIlya){
+    setScene(`<p>You reach a side room before anyone notices. A courier is tied to a support post, conscious but weak.</p>`);
+    const a=clearActions();
+    a.append(
+      btn("Free her now",()=>{
+        S.flags.rescuedIlya=true;log("Freed Ilya before confronting the cellar occupants.");
+        if(hasItem("tonic"))a.append();
+        setScene(`<p>She gives her name as Ilya. “There are two of them in the next room. One is wearing a watchman's badge that isn't his.”</p>`);
+        const aa=clearActions();
+        if((S.inv.find(x=>x.id==="tonic")?.qty||0)>0)aa.append(btn("Give her a tonic",()=>{removeItem("tonic",1);S.flags.tonicGift=true;log("Gave Ilya a tonic.");setScene(`<p>Color returns to her face. “I can walk. Mostly.”</p>`);clearActions().append(btn("Continue",()=>startCombat("cellar_guard")));}));
+        aa.append(btn("Tell her to stay hidden",()=>startCombat("cellar_guard")));
+      }),
+      btn("Scout the next room first",()=>startCombat("cellar_guard"))
+    );
+  } else startCombat("cellar_guard");
+}
+
+function afterCellarGuard(){
+  S.flags.cellarCleared=true;gainXp(5);
+  if(!S.flags.rescuedIlya){
+    S.flags.rescuedIlya=true;log("Found Ilya alive after clearing the outer cellar.");
+  }
+  addItem({id:"ledger",name:"Marked Ledger",type:"quest",desc:"Names, payments, road schedules, and several pages torn out."});
+  S.flags.tookLedger=true;log("Recovered a marked ledger from the toll cellar.");
+  S.pendingScene=()=>ledgerScene();
+  render();
+}
+function ledgerScene(){
+  S.pendingScene=null;
+  setScene(`<p>Among the gear in the outer room is a small ledger. Several entries list caravan dates and payment amounts. Some names are familiar from Wayside.</p><p>Ilya sees it and goes pale. “That isn't just bandit bookkeeping.”</p>`);
+  const a=clearActions();
+  a.append(
+    btn("Keep the ledger intact",()=>{S.flags.keptLedger=true;log("Kept the ledger as evidence.");render()}),
+    btn("Give it to Ilya",()=>{S.flags.gaveLedgerGuard=true;removeItem("ledger");log("Entrusted the ledger to Ilya.");setScene(`<p>Ilya wraps it carefully. “Mara should see this. Maybe not everyone else.”</p>`);clearActions().append(btn("Continue",render));}),
+    btn("Burn it",()=>{S.flags.burnedLedger=true;removeItem("ledger");S.rep-=1;log("Burned the ledger in the toll cellar.");setScene(`<p>The pages curl black in the lamp flame. Ilya watches without commenting.</p>`);clearActions().append(btn("Continue",render));})
+  );
+}
+
+function finalChamber(){
+  setScene(`<p>The inner room is smaller than expected. A man in a stolen roadwarden coat stands beside an old iron-bound strongbox. He looks exhausted rather than surprised.</p><p>“You don't understand who you're dragging into this.”</p>`);
+  const a=clearActions();
+  a.append(
+    btn("Demand he surrender",finalTalk),
+    btn("Attack",()=>startCombat("boss")),
+    btn("Ask what this is really about",finalTalk)
+  );
+}
+function finalTalk(){
+  let x=`<p>He claims the disappearances were meant to frighten traffic away while a smuggling route was reopened beneath the old tollhouse. Then he insists the ledger proves someone in Wayside paid for it.</p>`;
+  if(S.bg==="militia")x+=`<p>His roadwarden coat is wrong in small ways: badge placement, belt knot, boot pattern. He has worn uniforms before, but not this one.</p>`;
+  setScene(x);
+  const a=clearActions();
+  a.append(
+    btn("Offer surrender and a fair hearing",()=>{
+      if(S.flags.keptLedger||S.flags.gaveLedgerGuard){
+        S.flags.bossDefeated=true;S.flags.finalChoiceMade=true;gainXp(8);S.rep+=1;log("Convinced the cellar leader to surrender.");setScene(`<p>His eyes go to the ledger, then to Ilya. Finally, he drops his weapon.</p><p>“Then don't hand me to the first badge you see.”</p>`);clearActions().append(btn("Return to Wayside",()=>{S.loc="wayside";render()}));
+      } else {
+        setScene(`<p>He laughs once. “Fair hearing? With what evidence?” His hand moves toward his weapon.</p>`);clearActions().append(btn("Fight",()=>startCombat("boss")));
+      }
+    }),
+    btn("Tell him the evidence is enough",()=>startCombat("boss")),
+    btn("Walk away for now",()=>{S.loc="hollow";render()})
+  );
+}
+
+function startCombat(type){
+  let e;
+  if(type==="raider")e={id:type,name:"Road Raider",hp:18,maxHp:18,atk:4,xp:6,silver:7,pattern:["attack","heavy","guard"]};
+  if(type==="cellar_guard")e={id:type,name:"Cellar Enforcer",hp:24,maxHp:24,atk:5,xp:7,silver:6,pattern:S.flags.loudEntry?["heavy","attack","guard"]:["attack","guard","heavy"]};
+  if(type==="boss")e={id:type,name:"False Roadwarden",hp:36,maxHp:36,atk:6,xp:10,silver:10,pattern:["attack","guard","heavy","attack"]};
+  S.combat={...e,turn:0,guarded:false,playerGuard:false,last:`${e.name} steps into fighting distance.`};render();
+}
+function currentIntent(){return S.combat.pattern[S.combat.turn%S.combat.pattern.length]}
+function renderCombat(){
+  const p=$("#combatPanel");p.classList.toggle("hidden",!S.combat);
+  if(!S.combat)return;
+  const c=S.combat;$("#enemyName").textContent=c.name;$("#enemyHp").textContent=`${Math.max(0,c.hp)} / ${c.maxHp}`;
+  const i=currentIntent();$("#enemyIntent").innerHTML=`<strong>Enemy intent:</strong> ${i==="heavy"?"A committed heavy attack":i==="guard"?"A defensive stance":"A direct attack"}`;
+  $("#combatLog").textContent=c.last;
+  const box=$("#combatActions");box.innerHTML="";
+  CLASSES[S.cls].skills.forEach(sk=>box.append(btn(sk.name,()=>combatAction(sk.id),sk.txt)));
+  box.append(btn(`Use Tonic (${S.inv.find(x=>x.id==="tonic")?.qty||0})`,useTonic,"Restore 8 HP."));
+}
+function enemyTurn(){
+  const c=S.combat;if(!c)return;const i=currentIntent();
+  if(i==="guard"){c.guarded=true;c.last+=" The enemy raises a guarded stance.";c.turn++;return}
+  let dmg=i==="heavy"?c.atk+4:c.atk;
+  if(c.playerGuard)dmg=Math.floor(dmg/2);
+  S.hp-=dmg;c.last+=` The enemy hits you for ${dmg}.`;c.playerGuard=false;c.guarded=false;c.turn++;
+  if(S.hp<=0){
+    S.hp=S.maxHp;S.res=0;S.silver=Math.max(0,S.silver-4);S.loc="wayside";S.combat=null;S.pendingScene=null;
+    log("You were defeated and eventually made it back to Wayside.");
+  }
+}
+function combatAction(id){
+  const c=S.combat;if(!c)return;let dmg=0;
+  if(S.cls==="vanguard"){
+    if(id==="strike"){dmg=roll(4,7)+S.lvl;S.res=Math.min(S.maxRes,S.res+1);c.last=`Measured Strike deals ${dmg}.`}
+    if(id==="brace"){c.playerGuard=true;S.res=Math.min(S.maxRes,S.res+2);if(S.flags.holdFast)S.hp=Math.min(S.maxHp,S.hp+2);c.last="You Brace and steady yourself.";enemyTurn();render();return}
+    if(id==="riposte"){if(S.res<2){c.last="Not enough Resolve.";render();return}S.res-=2;dmg=roll(8,11)+S.lvl*2+(S.flags.retaliation?2:0);c.last=`Riposte deals ${dmg}.`}
+  } else if(S.cls==="ranger"){
+    if(id==="shot"){dmg=roll(4,7)+S.lvl;S.res=Math.min(S.maxRes,S.res+1);c.last=`Quick Shot deals ${dmg}.`}
+    if(id==="evade"){c.playerGuard=true;S.res=Math.min(S.maxRes,S.res+1);if(S.flags.fleetfoot)S.hp=Math.min(S.maxHp,S.hp+1);c.last="You shift out of the line of attack.";enemyTurn();render();return}
+    if(id==="pierce"){if(S.res<2){c.last="Not enough Momentum.";render();return}S.res-=2;dmg=roll(7,10)+S.lvl+(c.guarded?4:0)+(S.flags.patientAim?2:0);c.last=`Piercing Shot deals ${dmg}.`}
+  } else {
+    if(id==="bolt"){dmg=roll(5,8)+S.lvl;S.res=Math.min(S.maxRes,S.res+2);c.last=`Arc Bolt deals ${dmg}.`}
+    if(id==="ward"){c.playerGuard=true;S.res=Math.min(S.maxRes,S.res+1);c.last="A ward shimmers into place.";enemyTurn();render();return}
+    if(id==="flare"){if(S.res<3){c.last="Not enough Focus.";render();return}S.res-=3;dmg=roll(9,13)+S.lvl*2+(S.flags.hotterFlame?2:0);c.last=`Flare deals ${dmg}.`}
+  }
+  if(c.guarded && id!=="pierce")dmg=Math.max(1,Math.floor(dmg/2));
+  c.hp-=dmg;
+  if(c.hp<=0){resolveCombatVictory(c);return}
+  enemyTurn();render();
+}
+function resolveCombatVictory(c){
+  S.silver+=c.silver;gainXp(c.xp);log(`Defeated ${c.name}.`);
+  if(c.id==="raider"){
+    S.flags.raiderGone=true;S.flags.campSeen=true;
+    addItem({id:"road_token",name:"Stamped Road Token",type:"trinket",desc:"A brass token stamped with an old tollhouse mark."});
+    S.flags.foundCellar=true;
+  } else if(c.id==="cellar_guard"){
+    S.combat=null;afterCellarGuard();return;
+  } else if(c.id==="boss"){
+    S.flags.bossDefeated=true;S.flags.finalChoiceMade=true;S.rep+=1;log("Defeated the false roadwarden.");
+  }
+  S.combat=null;render();
+}
+function useTonic(){
+  const t=S.inv.find(x=>x.id==="tonic");
+  if(!t||t.qty<=0){S.combat.last="You have no tonic.";render();return}
+  t.qty--;S.hp=Math.min(S.maxHp,S.hp+8);S.combat.last="You drink a tonic and recover 8 HP.";enemyTurn();render();
+}
+
+function renderLevel(){
+  const p=$("#levelPanel");p.classList.toggle("hidden",!S.levelChoice);
+  if(!S.levelChoice)return;
+  const box=$("#levelChoices");box.innerHTML="";
+  const choices = S.cls==="vanguard"
+    ? [["Hold Fast","Brace restores 2 HP.",()=>S.flags.holdFast=true],["Retaliation","Riposte gains +2 damage.",()=>S.flags.retaliation=true],["Iron Constitution","+5 maximum HP.",()=>{S.maxHp+=5;S.hp+=5}]]
+    : S.cls==="ranger"
+    ? [["Patient Aim","Piercing Shot gains +2 damage.",()=>S.flags.patientAim=true],["Fleetfoot","Evade restores 1 HP.",()=>S.flags.fleetfoot=true],["Long Wind","+1 maximum Momentum.",()=>{S.maxRes+=1}]]
+    : [["Deep Wells","+1 maximum Focus.",()=>S.maxRes+=1],["Hotter Flame","Flare gains +2 damage.",()=>S.flags.hotterFlame=true],["Arcane Shell","+4 maximum HP.",()=>{S.maxHp+=4;S.hp+=4}]];
+  choices.forEach(([n,d,f])=>box.append(btn(n,()=>{f();S.lvl++;S.nextXp+=5;S.levelChoice=false;S.hp=S.maxHp;log(`Reached level ${S.lvl}: ${n}.`);render()},d)));
+}
+
+function returnToMara(){
+  S.flags.returned=true;
+  let x=`<p>Mara hears you out without interrupting. Ilya is brought inside and given a chair near the hearth.</p>`;
+  if(S.flags.keptLedger && hasItem("ledger"))x+=`<p>The ledger sits heavy in your pack.</p>`;
+  else if(S.flags.gaveLedgerGuard)x+=`<p>Ilya keeps the ledger wrapped beneath her coat.</p>`;
+  else if(S.flags.burnedLedger)x+=`<p>You have no ledger to show her.</p>`;
+  setScene(x);
+  const a=clearActions();
+  if(S.flags.keptLedger && hasItem("ledger")){
+    a.append(
+      btn("Give Mara the ledger",()=>{S.flags.gaveLedgerMara=true;removeItem("ledger");S.silver+=24;S.rep+=2;finishEnding("mara")}),
+      btn("Keep it for yourself",()=>{S.flags.keptLedger=true;S.silver+=20;finishEnding("kept")}),
+      btn("Give it to the town guard instead",()=>{S.flags.gaveLedgerGuard=true;removeItem("ledger");S.silver+=20;S.rep+=1;finishEnding("guard")})
+    );
+  } else if(S.flags.gaveLedgerGuard){
+    a.append(btn("Let Ilya hand it over",()=>{S.silver+=24;S.rep+=2;finishEnding("mara")}));
+  } else if(S.flags.burnedLedger){
+    a.append(btn("Tell Mara what happened",()=>{S.silver+=16;finishEnding("burned")}));
+  } else {
+    a.append(btn("Report what you found",()=>{S.silver+=20;finishEnding("plain")}));
+  }
+}
+function finishEnding(kind){
+  S.flags.ending=kind;S.stage=99;S.quest="complete";gainXp(6);log("Completed the first Wayside quest.");
+  render();
+}
+function renderEnding(){
+  const a=clearActions();
+  let title="The Road Opens Again",body="";
+  const rescued=S.flags.rescuedIlya && S.flags.ilyaAlive;
+  if(S.flags.ending==="mara"){
+    body=`<p>Mara reads the first page, then closes the ledger and calls for two people she trusts.</p><p>By morning, word has spread that the north road is open again. Not safe, exactly—but open.</p>`;
+  } else if(S.flags.ending==="guard"){
+    body=`<p>The ledger leaves your hands and enters official custody. By morning, two doors in Wayside are sealed and one familiar face is gone.</p><p>Nobody explains much to you.</p>`;
+  } else if(S.flags.ending==="kept"){
+    body=`<p>You keep the ledger. Mara pays you for the rescue and the cellar, but watches you for half a second longer than before.</p><p>Whatever those names are worth, they are yours to decide.</p>`;
+  } else if(S.flags.ending==="burned"){
+    body=`<p>Mara believes enough of your story to pay you, though not enough to look satisfied.</p><p>Without the ledger, some questions will remain unanswered.</p>`;
+  } else {
+    body=`<p>Mara pays you and orders the north gate reopened at first light.</p><p>The immediate danger is over, even if the full story is not.</p>`;
+  }
+  if(rescued)body+=`<p>Ilya survives. Before leaving the inn, she tells you: “If you're staying in Wayside, I'll owe you one.”</p>`;
+  if(S.flags.tonicGift)body+=`<p>She looks stronger than when you found her.</p>`;
+  body+=`<p><strong>Quest Complete.</strong></p><p class="muted">Wayside will remember what you chose. Your character remains playable, and this save state is ready for the next quest expansion.</p>`;
+  setScene(`<h3>${title}</h3>${body}`);
+  a.append(btn("Continue in Wayside",()=>{S.flags.ending=null;S.loc="wayside";setScene(`<p>The first road north is open again. For now, Wayside is quiet.</p>`);clearActions();renderTabs();}));
+}
+
+// Safari/local-file startup diagnostics.
+chooseStorageBackend().then(mode=>{
+  if(mode==="none") setSaveStatus("Game works, but persistent saves are unavailable in this opening mode.");
+  else setSaveStatus("Ready.");
+}).catch(()=>setSaveStatus("Game ready; storage check failed."));
+
+})();
+</script>
+</body>
+</html>
