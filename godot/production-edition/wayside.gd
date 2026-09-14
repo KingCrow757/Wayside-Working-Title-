@@ -30,6 +30,7 @@ var stamina := 100.0
 var attack_cooldown := 0.0
 var invulnerability := 0.0
 var enemy_cooldown := 0.0
+var enemy_windup := 0.0
 var player_pos := Vector2(155, 420)
 var facing := Vector2.RIGHT
 var selected_plan := 0
@@ -140,6 +141,8 @@ func prepare_project() -> void:
  enemy_resolved = false
  enemy_avoided = false
  enemy_pos = Vector2(755, 410)
+ enemy_windup = 0
+ enemy_cooldown = 0
  health = maxf(health, 50.0)
  stamina = 100
  player_pos = Vector2(155, 420)
@@ -163,17 +166,23 @@ func _process(delta: float) -> void:
   enemy_cooldown = maxf(0, enemy_cooldown - delta)
   if not enemy_resolved:
    var distance := player_pos.distance_to(enemy_pos)
-   if distance < 180:
-    enemy_pos += (player_pos - enemy_pos).normalized() * delta * 72
-   if distance < 38 and enemy_cooldown <= 0 and invulnerability <= 0:
-    enemy_cooldown = 1.2
-    invulnerability = 0.75
-    if Input.is_key_pressed(KEY_SHIFT) and stamina >= 16:
-     stamina -= 16
-     set_note("You held your guard against the attack.")
-    else:
-     health -= 17
-     set_note("The threat struck. Guard, evade, or make space.")
+   if enemy_windup > 0:
+    enemy_windup -= delta
+    if enemy_windup <= 0:
+     enemy_cooldown = 1.25
+     if player_pos.distance_to(enemy_pos) < 57 and invulnerability <= 0:
+      invulnerability = 0.75
+      if Input.is_key_pressed(KEY_SHIFT) and stamina >= 16:
+       stamina -= 16
+       set_note("You held your guard against the marked lunge.")
+      else:
+       health -= 17
+       set_note("The threat struck. Watch for its warning ring.")
+   else:
+    if distance < 180:
+     enemy_pos += (player_pos - enemy_pos).normalized() * delta * (90 if active % 2 == 0 else 62)
+    if distance < 52 and enemy_cooldown <= 0:
+     enemy_windup = 0.55
    if player_pos.x > 975 and distance > 185:
     enemy_resolved = true
     enemy_avoided = true
@@ -500,6 +509,8 @@ func draw_site() -> void:
  if not enemy_resolved:
   draw_circle(enemy_pos, 22, Color("af695f"))
   draw_circle(enemy_pos + Vector2(6, -4), 4, Color("f5dfb3"))
+  if enemy_windup > 0:
+   draw_arc(enemy_pos, 56, 0, TAU, 32, Color("f0b66b"), 4)
   draw_text(str(project["hazard"]), enemy_pos + Vector2(-40, -33), 15)
  draw_circle(player_pos, 17, PAPER)
  draw_circle(player_pos, 10, Color("3e6172"))
