@@ -531,9 +531,19 @@ func draw_work() -> void:
 func draw_return() -> void:
  draw_panel(Rect2(160, 160, 960, 450))
  draw_text("The road changes", Vector2(190, 210), 31, GOLD)
- draw_wrapped(last_result, Vector2(190, 262), 85, 20)
- draw_text("Your result is recorded once in the world ledger.", Vector2(190, 360), 19)
- draw_text("Wayside road access: %d    Supply: %d    Community trust: %d" % [road, supply, trust], Vector2(190, 400), 18)
+ draw_wrapped(last_result, Vector2(190, 262), 47, 20)
+ draw_text("A local witness will carry this account to Wayside.", Vector2(190, 365), 17)
+ draw_text("Road %d    Supply %d    Trust %d" % [road, supply, trust], Vector2(190, 405), 18)
+ draw_rect(Rect2(805, 255, 240, 155), Color("426c7b"))
+ if selected_plan == 0:
+  draw_rect(Rect2(805, 314, 240, 55), Color("a39474"))
+  for i in 5:
+   draw_rect(Rect2(818 + i * 45, 370, 13, 35), Color("776954"))
+ else:
+  draw_line(Vector2(813, 310), Vector2(1036, 310), GOLD, 3)
+  draw_polygon(PackedVector2Array([Vector2(853, 345), Vector2(982, 345), Vector2(962, 370), Vector2(876, 370)]), PackedColorArray([Color("806e54")]))
+  draw_line(Vector2(921, 344), Vector2(921, 281), GOLD, 4)
+ draw_text("AFTER / " + str(current()["options"][selected_plan]["name"]), Vector2(805, 445), 16, GOLD)
  draw_text("1  Return to Wayside and witness the response", Vector2(200, 530), 22, GOLD)
 
 func draw_settlement() -> void:
