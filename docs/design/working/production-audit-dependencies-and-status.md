@@ -1,8 +1,8 @@
 # Wayside — Production Audit Dependencies and First Convergence
 
-**Status:** Working audit coordination; not canon.  
-**Baseline inspected:** repository main commit `52a229f8def22b4fb865eb5afd8ce54d254d4de7`.  
-**Scope of this update:** Equipment & Inventory and Travel/Weather/Cartography drafted in parallel, then converged into Roadwork. This is not the final Integration Audit or Canon Migration Proposal.  
+**Status:** Working audit coordination; not canon.
+**Baseline inspected:** initial block at `52a229f8def22b4fb865eb5afd8ce54d254d4de7`; full remaining audit resumed from repository main tree `7b7439bbc8d34114747f4cb427376b90d3221b13`.
+**Scope of this update:** Full Production Edition paper audit through Integration and Canon Migration Proposal. Prototype gates remain unexecuted.
 **Approval:** The [Blueprint](../../Wayside_Game_Design_Blueprint_v0.1.md) remains canonical. Taylor's explicit approval is required for any promotion under [migration criteria](canon-migration-criteria.md).
 
 ## 1. Recovered dependency decision
@@ -56,12 +56,20 @@ Solid arrows express prerequisite reconciliation for a locked downstream specifi
 | [Equipment & Inventory](equipment-inventory-production-pass-01.md) | First pass drafted; cross-pass review completed | E1–E6 not run; final values depend on combat/travel/economy |
 | [Travel/Weather/Cartography](travel-weather-cartography-production-pass-01.md) | First pass drafted in parallel with Equipment | T1–T6 not run; time/recovery/route rules need downstream checks |
 | [Roadwork & Infrastructure](roadwork-infrastructure-production-pass-01.md) | First convergence drafted and reviewed | P1–P6 not run; NPC and Economy must define actual commitments/reactions |
-| NPC/community consequence model | Next paper dependency; not completed here | Consume bounded project outcomes; allocate named witnesses and knowledge propagation |
-| Crafting/Economy | Follows NPC/roadwork reconciliation | Set minimal sources, prices, availability and fallback access for retained needs |
-| Wayside settlement consolidation | Can outline alongside NPC/Economy; lock after them | Keep 3–5 choices and 5–7 functional places; count major choices within two Wayside project slots |
-| Narrative/politics | Later pass; not completed here | Choose two regions and supported political/ending scope against actual project demands |
-| Companions; Investigation/Dialogue/Quest; Magic/Covenant | Can draft in parallel after narrative scope | Shared NPC/content limits; no independent systems that evade the production ceilings |
-| Content budget, art, architecture, slice, cuts, integration, migration | Remaining audit chain | Complete their own mappings/evidence; do not treat this first convergence as a full-game sign-off |
+| [NPC/community consequences](npc-community-consequences-production-pass-01.md) | Paper pass complete | N1–N4 untested; 28-character target, authored witnesses/shared states |
+| [Crafting/Economy](crafting-economy-production-pass-01.md) | Paper pass complete | F1–F5 untested; price bands, fixed recipes/refits, cargo ledger |
+| [Wayside settlement](wayside-settlement-production-pass-01.md) | Paper pass complete | S1–S4 untested; seven functions, four choices, 12 visual deltas |
+| [Narrative/politics](narrative-political-scope-production-pass-01.md) | Paper pass complete | Q1–Q4 untested; three acts, three blocs, four ending variants |
+| [Companions/relationships](companions-relationships-production-pass-01.md) | Paper pass complete | A1–A4 untested; two companions, friendship baseline |
+| [Investigation/dialogue/quests](investigation-dialogue-quests-production-pass-01.md) | Paper pass complete | I1–I5 untested; bounded evidence grammar and quest FSMs |
+| [Magic/covenant](magic-covenant-production-pass-01.md) | Paper pass complete | M1–M5 untested; witness resonance, three covenant Techniques max |
+| [World/content budget](world-content-budget-production-pass-01.md) | Paper pass complete | W1–W4 untested; two regions and multidisciplinary package ledger |
+| [Art/animation audit](art-animation-production-audit-pass-01.md) | Paper pass complete | V1–V5 untested; tiered hybrid-art pipeline |
+| [Technical architecture](technical-architecture-production-pass-01.md) | Paper pass complete | X1–X6 untested; event-driven domains, stable IDs, save transactions |
+| [Vertical slice](vertical-slice-production-plan-01.md) | Paper plan complete | No playable implementation; staged evidence gates defined |
+| [Risk/cut hierarchy](risk-cut-hierarchy-production-pass-01.md) | Paper pass complete | Apply at slice/production review gates |
+| [Full integration audit](full-integration-audit-production-edition-01.md) | Complete on paper | Internally compatible; not production-validated |
+| [Canon Migration Proposal](canon-migration-proposal-production-edition-01.md) | Prepared; awaiting Taylor | Canon untouched; explicit approval required |
 
 Roadwork foundations could be drafted during the opening parallel passes, but their final interface was reconciled after both delivered. NPC presentation can likewise be sketched alongside project iteration. Prices, schedule consequences, and content allocations cannot be locked while their inputs remain unspecified. The same applies to art/technical notes: early feasibility is useful, final approval is not implied.
 
