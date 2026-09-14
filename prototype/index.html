@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wayside — Crossing Prototype</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <p class="eyebrow">Production Edition · playable proof</p>
+        <h1>WAYSIDE</h1>
+      </div>
+      <div class="header-actions">
+        <button id="saveButton">Save</button>
+        <button id="loadButton">Load</button>
+        <button id="restartButton" class="danger">Restart</button>
+      </div>
+    </header>
+
+    <section class="game-frame">
+      <canvas id="game" width="960" height="540" aria-label="Wayside playable prototype"></canvas>
+      <div id="toast" role="status" aria-live="polite"></div>
+      <div class="touch-controls" aria-label="Touch controls">
+        <div class="dpad">
+          <button data-hold="w" aria-label="Move up">▲</button>
+          <button data-hold="a" aria-label="Move left">◀</button>
+          <button data-hold="s" aria-label="Move down">▼</button>
+          <button data-hold="d" aria-label="Move right">▶</button>
+        </div>
+        <div class="action-pad">
+          <button data-action="interact">Use</button>
+          <button data-action="attack">Strike</button>
+          <button data-hold="k">Guard</button>
+          <button data-action="evade">Evade</button>
+        </div>
+      </div>
+      <div id="dialogue" class="panel dialogue hidden">
+        <p id="speaker" class="speaker"></p>
+        <h2 id="dialogueTitle"></h2>
+        <p id="dialogueText"></p>
+        <div id="choices" class="choices"></div>
+      </div>
+      <div id="startPanel" class="panel start-panel">
+        <p class="eyebrow">A fifteen-minute systems sketch</p>
+        <h2>The Siltway Crossing has failed.</h2>
+        <p>Travel from Wayside, investigate what broke, survive or avoid the road threat, then choose what kind of passage the community will inherit.</p>
+        <button id="startButton" class="primary">Begin patrol</button>
+      </div>
+    </section>
+
+    <section class="below">
+      <aside class="card objective-card">
+        <p class="label">Current undertaking</p>
+        <h2 id="objectiveTitle">Awaiting departure</h2>
+        <p id="objectiveText">Begin the patrol to enter Wayside.</p>
+        <div id="progress"></div>
+      </aside>
+      <aside class="card journal-card">
+        <div class="journal-heading">
+          <div>
+            <p class="label">Field journal</p>
+            <h2>What you know</h2>
+          </div>
+          <span id="evidenceCount">0 / 5</span>
+        </div>
+        <div id="journal"><p class="muted">Evidence will be separated into observed facts, reports, and inferences.</p></div>
+      </aside>
+    </section>
+
+    <footer>
+      <span><kbd>WASD</kbd>/<kbd>Arrows</kbd> move</span>
+      <span><kbd>E</kbd>/<kbd>Space</kbd> interact</span>
+      <span><kbd>J</kbd> light attack</span>
+      <span><kbd>K</kbd> guard</span>
+      <span><kbd>L</kbd> evade</span>
+      <span>Gamepad supported</span>
+    </footer>
+  </main>
+  <script src="core.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
